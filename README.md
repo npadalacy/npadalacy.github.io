@@ -85,3 +85,88 @@ A no-framework, no-iframe static page showcasing **Amazon Connect Chat**:
 - Keep "demo" for now.
 - When AWS is ready: set CHAT_MODE = "aws" and set AWS_API_BASE_URL.
    
+## AWS Backend Integration (AmazonConnectChat)
+
+This site is a static GitHub Pages app. To connect the chat UI to your own AWS backend, you must provide an HTTPS API endpoint and enable CORS for the GitHub Pages domain.
+
+### How the chat works
+
+The chat UI supports two modes:
+
+- **Demo mode** (default): replies are generated locally in the browser.
+- **AWS mode**: each customer message is sent to an AWS API endpoint, and the server returns a reply.
+
+### Configure AWS mode
+
+1. Open this file:
+
+   `AmazonConnectChat/assets/js/app.js`
+
+2. Set the mode:
+
+   ```js
+   var CHAT_MODE = "aws";
+   // var CHAT_MODE = "demo";
+   ```
+
+   If you do not yet have a working AWS API, keep `CHAT_MODE = "demo"`.
+
+3. Set the AWS API base URL:
+
+   ```js
+   var AWS_API_BASE_URL = "https://YOUR_API_ID.execute-api.YOUR_REGION.amazonaws.com/YOUR_STAGE";
+   ```
+
+   Example:
+
+   ```js
+   var AWS_API_BASE_URL = "https://abc123.execute-api.us-east-1.amazonaws.com/prod";
+   ```
+
+### API contract (frontend -> AWS)
+
+The frontend will call:
+
+- `POST {AWS_API_BASE_URL}/chat/messages`
+
+Request JSON sent by the browser:
+
+```json
+{
+  "sessionId": "s_xxx",
+  "messageId": "m_xxx",
+  "timestamp": "2026-04-10T18:22:10Z",
+  "from": "customer",
+  "text": "Hello"
+}
+```
+
+The backend must respond with JSON in either format:
+
+Option A:
+```json
+{ "reply": { "text": "Hi! How can I help?" } }
+```
+
+Option B:
+```json
+{ "replyText": "Hi! How can I help?" }
+```
+
+### CORS requirements (must be configured in AWS)
+
+Because this site is hosted on GitHub Pages, the AWS API must allow browser requests from:
+
+- `https://npadalacy.github.io`
+
+CORS must allow:
+- Methods: `POST, OPTIONS`
+- Headers: `Content-Type` (and `Authorization` if you add auth later)
+
+### Troubleshooting
+
+If AWS mode shows an error or no reply:
+- Verify `AWS_API_BASE_URL` is correct (no trailing spaces)
+- Verify the endpoint `POST /chat/messages` exists
+- Verify CORS is enabled for `https://npadalacy.github.io`
+- Check AWS logs (CloudWatch) for request errors
