@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="npadalacy GitHub Pages — personal site and project demos." />
+  <title>npadalacy — GitHub Pages</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --aws-blue: #232f3e;
+      --aws-orange: #ff9900;
+      --aws-teal: #00a1c9;
+      --white: #fff;
+      --light: #f8f9fa;
+      --border: #dee2e6;
+      --text: #212529;
+      --muted: #6c757d;
+    }
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: var(--light);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--aws-blue);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      width: 36px; height: 36px;
+      background: var(--aws-orange);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 18px; color: var(--aws-blue);
+    }
+    header h1 { color: var(--white); font-size: 18px; font-weight: 700; }
+    header h1 span { color: var(--aws-orange); }
+
+    .hero {
+      background: linear-gradient(135deg, var(--aws-blue) 0%, #37475a 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 72px 24px 80px;
+    }
+    .hero h2 { font-size: clamp(26px, 5vw, 48px); font-weight: 800; margin-bottom: 14px; }
+    .hero h2 span { color: var(--aws-orange); }
+    .hero p { font-size: 17px; opacity: .8; max-width: 500px; margin: 0 auto; line-height: 1.65; }
+
+    main { flex: 1; padding: 56px 24px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+      text-transform: uppercase; color: var(--aws-teal); margin-bottom: 8px;
+    }
+    h2.grid-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .grid-desc { font-size: 15px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .project-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow .2s, transform .2s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .project-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.1); transform: translateY(-3px); }
+    .card-icon {
+      width: 48px; height: 48px;
+      background: rgba(0,161,201,.1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .card-badge {
+      display: inline-block;
+      background: rgba(0,161,201,.12);
+      color: var(--aws-teal);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .8px; text-transform: uppercase;
+      padding: 2px 10px; border-radius: 20px;
+      width: fit-content;
+    }
+    .project-card h3 { font-size: 17px; font-weight: 700; }
+    .project-card p { font-size: 14px; color: var(--muted); line-height: 1.6; flex: 1; }
+    .card-link { font-size: 13px; color: var(--aws-teal); font-weight: 600; margin-top: 4px; }
+
+    footer {
+      background: var(--aws-blue);
+      color: rgba(255,255,255,.55);
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+    }
+    footer a { color: var(--aws-orange); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-badge">N</div>
+    <h1>npadalacy <span>/</span> GitHub Pages</h1>
+  </header>
+
+  <section class="hero">
+    <h2>Personal Projects &amp;<br><span>Demo Sites</span></h2>
+    <p>A collection of demos, experiments, and mini-apps deployed via GitHub Pages.</p>
+  </section>
+
+  <main>
+    <div class="container">
+      <div class="section-label">Projects</div>
+      <h2 class="grid-title">Available Demos</h2>
+      <p class="grid-desc">Browse the projects hosted here. Each demo is a self-contained static site — no login required.</p>
+
+      <div class="project-grid">
+        <a href="AmazonConnectChat/" class="project-card">
+          <div class="card-icon">💬</div>
+          <span class="card-badge">AWS · Chat</span>
+          <h3>Amazon Connect Chat</h3>
+          <p>A demo landing page showcasing Amazon Connect Chat features — real-time routing, AI bots, omnichannel support, and more.</p>
+          <span class="card-link">Open demo →</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      &copy; 2024 npadalacy &nbsp;|&nbsp;
+      <a href="https://github.com/npadalacy" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
+    </p>
+  </footer>
+
+</body>
+</html>
