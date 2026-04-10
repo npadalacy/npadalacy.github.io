@@ -1,1 +1,289 @@
-/*!\n * AmazonConnectChat – app.js\n * Demo chat modal with simple bot automation (no dependencies).\n * Adds AWS forwarding mode (disabled by default until you have an API URL).\n */\n(function () {\n  "use strict";\n\n  /**\n   * MODE SWITCH\n   * - Keep "demo" for now.\n   * - When AWS is ready: set CHAT_MODE = "aws" and set AWS_API_BASE_URL.\n   */\n  var CHAT_MODE = "demo";\n  // var CHAT_MODE = "aws";\n\n  /* ── Demo bot script ──────────────────────────────────── */\n  var BOT_SCRIPT = [\n    { delay: 800,  text: "Hi there! 👋 Welcome to Amazon Connect Chat support. How can I help you today?" },\n    { delay: 2000, text: "You can ask about account setup, pricing, integration guides, or request a live agent." },\n  ];\n\n  var AUTO_REPLIES = {\n    default:      "Thanks for reaching out! Let me connect you with the right support team. ⏳",\n    pricing:      "Our pricing is usage-based. You pay only for what you use — starting at $0.004 per message. 💰 Want a detailed breakdown?",\n    setup:        "Getting started is easy! You can launch Amazon Connect in under 10 minutes. Would you like a step-by-step guide?",\n    integration:  "Amazon Connect integrates natively with AWS services like Lambda, S3, Lex, and more. Which integration are you looking for?",\n    agent:        "Connecting you to a live agent now… ⚡ Average wait time is under 2 minutes.",\n    hello:        "Hello! 😊 Great to hear from you. What can I assist you with today?",\n    help:         "Sure! Here are some things I can help with:\n• Account & billing\n• Technical setup\n• Integrations\n• Live agent escalation",\n  };\n\n  function pickReply(text) {\n    var lower = text.toLowerCase();\n    if (/hello|hi|hey|greet/.test(lower))                 return AUTO_REPLIES.hello;\n    if (/price|pricing|cost|fee|charge/.test(lower))      return AUTO_REPLIES.pricing;\n    if (/setup|start|begin|onboard|create/.test(lower))   return AUTO_REPLIES.setup;\n    if (/integrat|connect|lambda|lex|s3/.test(lower))     return AUTO_REPLIES.integration;\n    if (/agent|human|person|live|representative/.test(lower)) return AUTO_REPLIES.agent;\n    if (/help|assist|support/.test(lower))                return AUTO_REPLIES.help;\n    return AUTO_REPLIES.default;\n  }\n\n  /* ── AWS integration (disabled until configured) ───────── */\n  var AWS_API_BASE_URL = "https://REPLACE_ME.execute-api.REGION.amazonaws.com/STAGE";\n\n  function getOrCreateSessionId() {\n    try {\n      var key = "acc_session_id";\n      var existing = localStorage.getItem(key);\n      if (existing) return existing;\n      var sid = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);\n      localStorage.setItem(key, sid);\n      return sid;\n    } catch (e) {\n      return "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);\n    }\n  }\n\n  function uuidLike() {\n    return "m_" + Math.random().toString(36).slice(2) + Date.now().toString(36);\n  }\n\n  async function sendToAws(sessionId, text) {\n    var url = AWS_API_BASE_URL.replace(/\/$/, "") + "/chat/messages";\n    var payload = {\n      sessionId: sessionId,\n      messageId: uuidLike(),\n      timestamp: new Date().toISOString(),\n      from: "customer",\n      text: text\n    };\n\n    var res = await fetch(url, {\n      method: "POST",\n      headers: { "Content-Type": "application/json" },\n      body: JSON.stringify(payload)\n    });\n\n    if (!res.ok) {\n      var bodyText = "";\n      try { bodyText = await res.text(); } catch (e) {}\n      throw new Error("AWS chat API failed: HTTP " + res.status + (bodyText ? (" - " + bodyText) : ""));\n    }\n\n    var data = {};\n    try { data = await res.json(); } catch (e) {}\n\n    if (data && data.reply && typeof data.reply.text === "string") return data.reply.text;\n    if (data && typeof data.replyText === "string") return data.replyText;\n    if (data && data.status === "pending") return "Thanks! A support agent will reply shortly.";\n\n    return "Thanks! We received your message.";\n  }\n\n  /* ── Helpers ───────────────────────────────────────────── */\n  function escapeHtml(str) {\n    return str\n      .replace(/&/g, "&amp;")\n      .replace(/</g, "&lt;")\n      .replace(/>/g, "&gt;")\n      .replace(/\"/g, "&quot;")\n      .replace(/'/g, "&#039;")\n      .replace(/\n/g, "<br>");\n  }\n\n  function now() {\n    var d = new Date();\n    var h = d.getHours(), m = d.getMinutes();\n    var ampm = h >= 12 ? "PM" : "AM";\n    h = h % 12 || 12;\n    return h + ":" + (m < 10 ? "0" + m : m) + " " + ampm;\n  }\n\n  /* ── Message renderer ─────────────────────────────────── */\n  function createMsg(text, isUser) {\n    var wrap = document.createElement("div");\n    wrap.className = "msg " + (isUser ? "msg-user" : "msg-agent");\n    var bubble = document.createElement("div");\n    bubble.className = "msg-bubble";\n    bubble.innerHTML = escapeHtml(text);\n    var time = document.createElement("div");\n    time.className = "msg-time";\n    time.textContent = now();\n    wrap.appendChild(bubble);\n    wrap.appendChild(time);\n    return wrap;\n  }\n\n  function createTyping() {\n    var wrap = document.createElement("div");\n    wrap.className = "msg msg-agent";\n    wrap.innerHTML =\n      '<div class="typing-indicator">' +\n        '<div class="typing-dot"></div>' +\n        '<div class="typing-dot"></div>' +\n        '<div class="typing-dot"></div>' +\n      "</div>";\n    return wrap;\n  }\n\n  /* ── Modal controller ─────────────────────────────────── */\n  var ChatModal = (function () {\n    var overlay, messageList, inputEl, sendBtn, fab;\n    var opened = false;\n    var scriptStep = 0;\n    var sessionId = getOrCreateSessionId();\n\n    function scrollToBottom() {\n      messageList.scrollTop = messageList.scrollHeight;\n    }\n\n    function addAgentMsg(text) {\n      var typing = createTyping();\n      messageList.appendChild(typing);\n      scrollToBottom();\n      var delay = Math.min(600 + text.length * 18, 2200);\n      setTimeout(function () {\n        messageList.removeChild(typing);\n        messageList.appendChild(createMsg(text, false));\n        scrollToBottom();\n      }, delay);\n    }\n\n    async function sendUserMsg() {\n      var text = inputEl.value.trim();\n      if (!text) return;\n\n      inputEl.value = "";\n      messageList.appendChild(createMsg(text, true));\n      scrollToBottom();\n\n      if (CHAT_MODE === "demo") {\n        setTimeout(function () { addAgentMsg(pickReply(text)); }, 400);\n        return;\n      }\n\n      if (CHAT_MODE === "aws") {\n        var typing = createTyping();\n        messageList.appendChild(typing);\n        scrollToBottom();\n\n        try {\n          var replyText = await sendToAws(sessionId, text);\n          messageList.removeChild(typing);\n          messageList.appendChild(createMsg(replyText, false));\n          scrollToBottom();\n        } catch (err) {\n          messageList.removeChild(typing);\n          messageList.appendChild(createMsg("Sorry — we could not reach support right now. Please try again.", false));\n          scrollToBottom();\n          console.error(err);\n        }\n        return;\n      }\n\n      addAgentMsg("Chat mode not configured.");\n    }\n\n    function runScript() {\n      if (CHAT_MODE !== "demo") return;\n      if (scriptStep >= BOT_SCRIPT.length) return;\n      var step = BOT_SCRIPT[scriptStep++];\n      setTimeout(function () {\n        addAgentMsg(step.text);\n        runScript();\n      }, step.delay);\n    }\n\n    function open() {\n      overlay.classList.add("active");\n      inputEl.focus();\n      if (!opened) {\n        opened = true;\n        runScript();\n        var badge = fab.querySelector(".chat-fab-badge");\n        if (badge) badge.style.display = "none";\n      }\n    }\n\n    function close() {\n      overlay.classList.remove("active");\n    }\n\n    function init() {\n      overlay     = document.getElementById("chatModalOverlay");\n      messageList = document.getElementById("modalMessages");\n      inputEl     = document.getElementById("modalInput");\n      sendBtn     = document.getElementById("modalSend");\n      fab         = document.getElementById("chatFab");\n\n      if (!overlay) return;\n\n      fab.addEventListener("click", open);\n      var triggers = document.querySelectorAll("[data-chat-open]");\n      for (var i = 0; i < triggers.length; i++) {\n        triggers[i].addEventListener("click", function (e) { e.preventDefault(); open(); });\n      }\n\n      document.getElementById("modalClose").addEventListener("click", close);\n      overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });\n\n      sendBtn.addEventListener("click", function () { void sendUserMsg(); });\n      inputEl.addEventListener("keydown", function (e) { if (e.key === "Enter") void sendUserMsg(); });\n\n      document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });\n    }\n\n    return { init: init };\n  })();\n\n  /* ── Smooth scroll for anchor links ──────────────────── */\n  function initSmoothScroll() {\n    var links = document.querySelectorAll('a[href^="#"]');\n    for (var i = 0; i < links.length; i++) {\n      links[i].addEventListener("click", function (e) {\n        var target = document.querySelector(this.getAttribute("href"));\n        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: "smooth", block: "start" }); }\n      });\n    }\n  }\n\n  /* ── Intersection-based fade-in ──────────────────────── */\n  function initAnimations() {\n    if (!window.IntersectionObserver) return;\n    var items = document.querySelectorAll(".feature-card, .step, .stat-item");\n    items.forEach(function (el) {\n      el.style.opacity = "0";\n      el.style.transform = "translateY(20px)";\n      el.style.transition = "opacity .5s ease, transform .5s ease";\n    });\n    var observer = new IntersectionObserver(function (entries) {\n      entries.forEach(function (entry) {\n        if (entry.isIntersecting) {\n          entry.target.style.opacity = "1";\n          entry.target.style.transform = "translateY(0)";\n          observer.unobserve(entry.target);\n        }\n      });\n    }, { threshold: 0.12 });\n    items.forEach(function (el) { observer.observe(el); });\n  }\n\n  document.addEventListener("DOMContentLoaded", function () {\n    ChatModal.init();\n    initSmoothScroll();\n    initAnimations();\n  });\n})();
+/*!
+ * AmazonConnectChat – app.js
+ * Demo chat modal with simple bot automation (no dependencies).
+ * Adds AWS forwarding mode (disabled by default until you have an API URL).
+ */
+(function () {
+  "use strict";
+
+  /**
+   * MODE SWITCH
+   * - Keep "demo" for now.
+   * - When AWS is ready: set CHAT_MODE = "aws" and set AWS_API_BASE_URL.
+   */
+  var CHAT_MODE = "demo";
+  // var CHAT_MODE = "aws";
+
+  /* ── Demo bot script ──────────────────────────────────── */
+  var BOT_SCRIPT = [
+    { delay: 800,  text: "Hi there! 👋 Welcome to Amazon Connect Chat support. How can I help you today?" },
+    { delay: 2000, text: "You can ask about account setup, pricing, integration guides, or request a live agent." },
+  ];
+
+  var AUTO_REPLIES = {
+    default:      "Thanks for reaching out! Let me connect you with the right support team. ⏳",
+    pricing:      "Our pricing is usage-based. You pay only for what you use — starting at $0.004 per message. 💰 Want a detailed breakdown?",
+    setup:        "Getting started is easy! You can launch Amazon Connect in under 10 minutes. Would you like a step-by-step guide?",
+    integration:  "Amazon Connect integrates natively with AWS services like Lambda, S3, Lex, and more. Which integration are you looking for?",
+    agent:        "Connecting you to a live agent now… ⚡ Average wait time is under 2 minutes.",
+    hello:        "Hello! 😊 Great to hear from you. What can I assist you with today?",
+    help:         "Sure! Here are some things I can help with:\n• Account & billing\n• Technical setup\n• Integrations\n• Live agent escalation",
+  };
+
+  function pickReply(text) {
+    var lower = text.toLowerCase();
+    if (/hello|hi|hey|greet/.test(lower))                 return AUTO_REPLIES.hello;
+    if (/price|pricing|cost|fee|charge/.test(lower))      return AUTO_REPLIES.pricing;
+    if (/setup|start|begin|onboard|create/.test(lower))   return AUTO_REPLIES.setup;
+    if (/integrat|connect|lambda|lex|s3/.test(lower))     return AUTO_REPLIES.integration;
+    if (/agent|human|person|live|representative/.test(lower)) return AUTO_REPLIES.agent;
+    if (/help|assist|support/.test(lower))                return AUTO_REPLIES.help;
+    return AUTO_REPLIES.default;
+  }
+
+  /* ── AWS integration (disabled until configured) ───────── */
+  var AWS_API_BASE_URL = "https://REPLACE_ME.execute-api.REGION.amazonaws.com/STAGE";
+
+  function getOrCreateSessionId() {
+    try {
+      var key = "acc_session_id";
+      var existing = localStorage.getItem(key);
+      if (existing) return existing;
+      var sid = "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(key, sid);
+      return sid;
+    } catch (e) {
+      return "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+  }
+
+  function uuidLike() {
+    return "m_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  async function sendToAws(sessionId, text) {
+    var url = AWS_API_BASE_URL.replace(/\/$/, "") + "/chat/messages";
+    var payload = {
+      sessionId: sessionId,
+      messageId: uuidLike(),
+      timestamp: new Date().toISOString(),
+      from: "customer",
+      text: text
+    };
+
+    var res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      var bodyText = "";
+      try { bodyText = await res.text(); } catch (e) {}
+      throw new Error("AWS chat API failed: HTTP " + res.status + (bodyText ? (" - " + bodyText) : ""));
+    }
+
+    var data = {};
+    try { data = await res.json(); } catch (e) {}
+
+    if (data && data.reply && typeof data.reply.text === "string") return data.reply.text;
+    if (data && typeof data.replyText === "string") return data.replyText;
+    if (data && data.status === "pending") return "Thanks! A support agent will reply shortly.";
+
+    return "Thanks! We received your message.";
+  }
+
+  /* ── Helpers ───────────────────────────────────────────── */
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
+      .replace(/\n/g, "<br>");
+  }
+
+  function now() {
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes();
+    var ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return h + ":" + (m < 10 ? "0" + m : m) + " " + ampm;
+  }
+
+  /* ── Message renderer ─────────────────────────────────── */
+  function createMsg(text, isUser) {
+    var wrap = document.createElement("div");
+    wrap.className = "msg " + (isUser ? "msg-user" : "msg-agent");
+    var bubble = document.createElement("div");
+    bubble.className = "msg-bubble";
+    bubble.innerHTML = escapeHtml(text);
+    var time = document.createElement("div");
+    time.className = "msg-time";
+    time.textContent = now();
+    wrap.appendChild(bubble);
+    wrap.appendChild(time);
+    return wrap;
+  }
+
+  function createTyping() {
+    var wrap = document.createElement("div");
+    wrap.className = "msg msg-agent";
+    wrap.innerHTML =
+      '<div class="typing-indicator">' +
+        '<div class="typing-dot"></div>' +
+        '<div class="typing-dot"></div>' +
+        '<div class="typing-dot"></div>' +
+      "</div>";
+    return wrap;
+  }
+
+  /* ── Modal controller ─────────────────────────────────── */
+  var ChatModal = (function () {
+    var overlay, messageList, inputEl, sendBtn, fab;
+    var opened = false;
+    var scriptStep = 0;
+    var sessionId = getOrCreateSessionId();
+
+    function scrollToBottom() {
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    function addAgentMsg(text) {
+      var typing = createTyping();
+      messageList.appendChild(typing);
+      scrollToBottom();
+      var delay = Math.min(600 + text.length * 18, 2200);
+      setTimeout(function () {
+        messageList.removeChild(typing);
+        messageList.appendChild(createMsg(text, false));
+        scrollToBottom();
+      }, delay);
+    }
+
+    async function sendUserMsg() {
+      var text = inputEl.value.trim();
+      if (!text) return;
+
+      inputEl.value = "";
+      messageList.appendChild(createMsg(text, true));
+      scrollToBottom();
+
+      if (CHAT_MODE === "demo") {
+        setTimeout(function () { addAgentMsg(pickReply(text)); }, 400);
+        return;
+      }
+
+      if (CHAT_MODE === "aws") {
+        var typing = createTyping();
+        messageList.appendChild(typing);
+        scrollToBottom();
+
+        try {
+          var replyText = await sendToAws(sessionId, text);
+          messageList.removeChild(typing);
+          messageList.appendChild(createMsg(replyText, false));
+          scrollToBottom();
+        } catch (err) {
+          messageList.removeChild(typing);
+          messageList.appendChild(createMsg("Sorry — we could not reach support right now. Please try again.", false));
+          scrollToBottom();
+          console.error(err);
+        }
+        return;
+      }
+
+      addAgentMsg("Chat mode not configured.");
+    }
+
+    function runScript() {
+      if (CHAT_MODE !== "demo") return;
+      if (scriptStep >= BOT_SCRIPT.length) return;
+      var step = BOT_SCRIPT[scriptStep++];
+      setTimeout(function () {
+        addAgentMsg(step.text);
+        runScript();
+      }, step.delay);
+    }
+
+    function open() {
+      overlay.classList.add("active");
+      inputEl.focus();
+      if (!opened) {
+        opened = true;
+        runScript();
+        var badge = fab.querySelector(".chat-fab-badge");
+        if (badge) badge.style.display = "none";
+      }
+    }
+
+    function close() {
+      overlay.classList.remove("active");
+    }
+
+    function init() {
+      overlay     = document.getElementById("chatModalOverlay");
+      messageList = document.getElementById("modalMessages");
+      inputEl     = document.getElementById("modalInput");
+      sendBtn     = document.getElementById("modalSend");
+      fab         = document.getElementById("chatFab");
+
+      if (!overlay) return;
+
+      fab.addEventListener("click", open);
+      var triggers = document.querySelectorAll("[data-chat-open]");
+      for (var i = 0; i < triggers.length; i++) {
+        triggers[i].addEventListener("click", function (e) { e.preventDefault(); open(); });
+      }
+
+      document.getElementById("modalClose").addEventListener("click", close);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
+
+      sendBtn.addEventListener("click", function () { void sendUserMsg(); });
+      inputEl.addEventListener("keydown", function (e) { if (e.key === "Enter") void sendUserMsg(); });
+
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    }
+
+    return { init: init };
+  })();
+
+  /* ── Smooth scroll for anchor links ──────────────────── */
+  function initSmoothScroll() {
+    var links = document.querySelectorAll('a[href^="#"]');
+    for (var i = 0; i < links.length; i++) {
+      links[i].addEventListener("click", function (e) {
+        var target = document.querySelector(this.getAttribute("href"));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+      });
+    }
+  }
+
+  /* ── Intersection-based fade-in ──────────────────────── */
+  function initAnimations() {
+    if (!window.IntersectionObserver) return;
+    var items = document.querySelectorAll(".feature-card, .step, .stat-item");
+    items.forEach(function (el) {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(20px)";
+      el.style.transition = "opacity .5s ease, transform .5s ease";
+    });
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = "1";
+          entry.target.style.transform = "translateY(0)";
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    items.forEach(function (el) { observer.observe(el); });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    ChatModal.init();
+    initSmoothScroll();
+    initAnimations();
+  });
+})();
