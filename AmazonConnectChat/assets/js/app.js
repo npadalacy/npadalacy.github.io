@@ -11,8 +11,8 @@
    * - Keep "demo" for now.
    * - When AWS is ready: set CHAT_MODE = "aws" and set AWS_API_BASE_URL.
    */
-  var CHAT_MODE = "demo";
-  // var CHAT_MODE = "aws";
+  //var CHAT_MODE = "demo";
+  var CHAT_MODE = "aws";
 
   /* ── Demo bot script ──────────────────────────────────── */
   var BOT_SCRIPT = [
