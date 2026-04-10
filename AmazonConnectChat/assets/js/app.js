@@ -11,8 +11,8 @@
    * - Keep "demo" for now.
    * - When AWS is ready: set CHAT_MODE = "aws" and set AWS_API_BASE_URL.
    */
-  //var CHAT_MODE = "demo";
-  var CHAT_MODE = "aws";
+  var CHAT_MODE = "demo";
+  // var CHAT_MODE = "aws";
 
   /* ── Demo bot script ──────────────────────────────────── */
   var BOT_SCRIPT = [
@@ -42,6 +42,8 @@
   }
 
   /* ── AWS integration (disabled until configured) ───────── */
+  // DevOps will provide the real API base URL later.
+  // Example: https://abc123.execute-api.us-east-1.amazonaws.com/prod
   var AWS_API_BASE_URL = "https://REPLACE_ME.execute-api.REGION.amazonaws.com/STAGE";
 
   function getOrCreateSessionId() {
@@ -231,18 +233,22 @@
 
       if (!overlay) return;
 
+      // Open triggers
       fab.addEventListener("click", open);
       var triggers = document.querySelectorAll("[data-chat-open]");
       for (var i = 0; i < triggers.length; i++) {
         triggers[i].addEventListener("click", function (e) { e.preventDefault(); open(); });
       }
 
+      // Close
       document.getElementById("modalClose").addEventListener("click", close);
       overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
 
+      // Send
       sendBtn.addEventListener("click", function () { void sendUserMsg(); });
       inputEl.addEventListener("keydown", function (e) { if (e.key === "Enter") void sendUserMsg(); });
 
+      // Keyboard accessibility
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
     }
 
@@ -281,6 +287,7 @@
     items.forEach(function (el) { observer.observe(el); });
   }
 
+  /* ── Boot ──────────────────────────────────────────── */
   document.addEventListener("DOMContentLoaded", function () {
     ChatModal.init();
     initSmoothScroll();
