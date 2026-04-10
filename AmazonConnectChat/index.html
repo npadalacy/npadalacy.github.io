@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Amazon Connect Chat — a powerful cloud contact-centre chat solution built on AWS." />
+  <title>Amazon Connect Chat</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <!-- Favicon fallback using a data-URI so no external request is needed -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff9900'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='18' font-weight='900' fill='%23232f3e'>A</text></svg>" />
+</head>
+<body>
+
+  <!-- ══ Header ══════════════════════════════════════════════ -->
+  <header class="site-header">
+    <a href="#" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Amazon <span>Connect</span> Chat</span>
+    </a>
+    <nav class="header-nav">
+      <button class="btn-header" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Features</button>
+      <button class="btn-header" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">How it Works</button>
+      <button class="btn-header primary" data-chat-open>Try Demo</button>
+    </nav>
+  </header>
+
+  <!-- ══ Hero ════════════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-badge">AWS Powered · Fully Managed</div>
+    <h1>Intelligent Chat for<br><span>Modern Customer Support</span></h1>
+    <p>
+      Deliver seamless, real-time conversations at scale using Amazon Connect Chat —
+      the cloud contact-centre solution trusted by thousands of businesses worldwide.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-hero-primary" data-chat-open>💬 Start a Chat Demo</button>
+      <button class="btn-hero-secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Explore Features →</button>
+    </div>
+  </section>
+
+  <!-- ══ Stats bar ════════════════════════════════════════════ -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-number">99.9%</div>
+      <div class="stat-label">Uptime SLA</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">&lt; 2s</div>
+      <div class="stat-label">Avg. Connect Time</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">40+</div>
+      <div class="stat-label">AWS Integrations</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">150+</div>
+      <div class="stat-label">Countries Supported</div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ══ Features ══════════════════════════════════════════ -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-tag">Core Features</div>
+        <h2 class="section-title">Everything you need for great chat support</h2>
+        <p class="section-desc">Amazon Connect Chat gives you a fully managed, scalable chat platform that integrates natively with the rest of your AWS environment.</p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon icon-teal">🤖</div>
+            <h3>AI-Powered Bots</h3>
+            <p>Leverage Amazon Lex to build intelligent conversational bots that handle routine queries automatically, 24/7.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon icon-orange">⚡</div>
+            <h3>Real-Time Routing</h3>
+            <p>Intelligently route chats to the best available agent based on skills, availability, and customer context.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon icon-blue">🔒</div>
+            <h3>Enterprise Security</h3>
+            <p>Data encrypted in transit and at rest. Fully compliant with PCI DSS, HIPAA, SOC, and ISO standards.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon icon-green">📊</div>
+            <h3>Rich Analytics</h3>
+            <p>Real-time dashboards and historical reports powered by Amazon Connect Contact Lens give actionable insights.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon icon-teal">🔗</div>
+            <h3>Deep AWS Integration</h3>
+            <p>Native hooks into Lambda, S3, DynamoDB, SNS and more — build custom workflows without managing infrastructure.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon icon-orange">📱</div>
+            <h3>Omnichannel Ready</h3>
+            <p>Web chat, mobile SDK, and messaging channels in one place — give customers a consistent experience everywhere.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ How it works ════════════════════════════════════════ -->
+    <section class="section section-alt" id="how-it-works">
+      <div class="container">
+        <div class="section-tag">How it Works</div>
+        <h2 class="section-title">Up and running in minutes</h2>
+        <p class="section-desc">No hardware, no long lead times. Launch a production-ready chat channel in four simple steps.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>Create Instance</h3>
+            <p>Spin up an Amazon Connect instance from the AWS Console in seconds — no billing per seat.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>Design Flows</h3>
+            <p>Use the visual Contact Flow editor to craft intelligent routing rules and bot integrations.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Embed Widget</h3>
+            <p>Drop the JavaScript snippet into your website or app to surface the chat widget immediately.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <h3>Go Live</h3>
+            <p>Agents log into the browser-based Agent Workspace and start handling chats — no software install needed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ Demo section ════════════════════════════════════════ -->
+    <section class="section" id="demo">
+      <div class="container">
+        <div class="demo-wrapper">
+          <div class="demo-info">
+            <div class="section-tag">Live Demo</div>
+            <h2>See the chat experience<br>in action</h2>
+            <p>
+              Click the button below to open a fully functional demo chat panel.
+              Try asking about pricing, setup, integrations, or requesting a live agent.
+            </p>
+            <ul class="demo-features">
+              <li>Automated bot greetings &amp; intent routing</li>
+              <li>Realistic typing indicators</li>
+              <li>Keyboard-accessible modal</li>
+              <li>Responsive on any screen size</li>
+            </ul>
+            <button class="btn-demo" data-chat-open>Open Chat Demo →</button>
+          </div>
+
+          <!-- Static preview of the chat widget -->
+          <div class="chat-preview" aria-hidden="true">
+            <div class="chat-preview-header">
+              <div class="agent-avatar">S</div>
+              <div class="agent-info">
+                <div class="agent-name">Support Agent</div>
+                <div class="agent-status"><span class="status-dot"></span>Online — ready to help</div>
+              </div>
+            </div>
+            <div class="chat-preview-body">
+              <div class="msg msg-agent">
+                <div class="msg-bubble">Hi! 👋 Welcome to support. How can I help?</div>
+                <div class="msg-time">10:02 AM</div>
+              </div>
+              <div class="msg msg-user">
+                <div class="msg-bubble">I need help with my account setup.</div>
+                <div class="msg-time">10:03 AM</div>
+              </div>
+              <div class="msg msg-agent">
+                <div class="msg-bubble">Sure! Amazon Connect is easy to set up — usually under 10 minutes. Want a guide?</div>
+                <div class="msg-time">10:03 AM</div>
+              </div>
+              <div class="msg msg-agent">
+                <div class="typing-indicator">
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-preview-input">
+              <input type="text" placeholder="Type a message…" disabled aria-label="Chat input preview" />
+              <button class="send-btn" disabled aria-hidden="true">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CTA ══════════════════════════════════════════════ -->
+    <section class="cta-section">
+      <h2>Ready to transform your customer experience?</h2>
+      <p>Join thousands of companies using Amazon Connect Chat to deliver faster, smarter support at any scale.</p>
+      <div class="hero-actions">
+        <button class="btn-hero-primary" data-chat-open>💬 Chat with Us Now</button>
+        <a href="https://aws.amazon.com/connect/" class="btn-hero-secondary" style="display:inline-block;text-decoration:none;padding:13px 30px;border:2px solid rgba(255,255,255,.5);border-radius:6px;color:#fff;font-weight:600;" target="_blank" rel="noopener noreferrer">Learn More on AWS ↗</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══ Footer ═══════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <p>
+      &copy; 2024 Amazon Connect Chat Demo &nbsp;|&nbsp;
+      Built on <a href="https://aws.amazon.com/connect/" target="_blank" rel="noopener noreferrer">Amazon Connect</a> &nbsp;|&nbsp;
+      <a href="/">← Back to Home</a>
+    </p>
+  </footer>
+
+  <!-- ══ Chat Modal ════════════════════════════════════════════ -->
+  <div id="chatModalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Amazon Connect Chat Demo">
+    <div class="chat-modal">
+      <div class="modal-header">
+        <div class="agent-avatar">S</div>
+        <div class="agent-info">
+          <div class="agent-name">Support Agent</div>
+          <div class="agent-status"><span class="status-dot"></span>Online — Amazon Connect</div>
+        </div>
+        <button id="modalClose" class="modal-close" aria-label="Close chat">✕</button>
+      </div>
+      <div id="modalMessages" class="modal-messages" aria-live="polite"></div>
+      <div class="modal-input-row">
+        <input id="modalInput" type="text" placeholder="Type a message and press Enter…" aria-label="Chat message input" autocomplete="off" />
+        <button id="modalSend" class="modal-send" aria-label="Send message">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Floating chat button ══════════════════════════════════ -->
+  <button id="chatFab" class="chat-fab" aria-label="Open chat">
+    💬
+    <span class="chat-fab-badge">1</span>
+  </button>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
