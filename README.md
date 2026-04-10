@@ -73,3 +73,15 @@ A no-framework, no-iframe static page showcasing **Amazon Connect Chat**:
 - Floating action button (FAB) to open the chat from any scroll position
 - Responsive layout for mobile, tablet, and desktop
 - No external dependencies — pure HTML, CSS, and vanilla JS
+
+## Info to request from DevOps (so AWS will work with GitHub Pages)
+# Ask them for:
+- Public API base URL (API Gateway or ALB)
+- CORS allow-origin: https://npadalacy.github.io
+- Endpoint: POST /chat/messages
+- Expected request/response JSON format
+- Change below parameter in this file AmazonConnectChat/assets/js/app.js
+- MODE SWITCH
+- Keep "demo" for now.
+- When AWS is ready: set CHAT_MODE = "aws" and set AWS_API_BASE_URL.
+   
