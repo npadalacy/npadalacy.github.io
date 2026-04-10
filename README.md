@@ -1,6 +1,6 @@
 # npadalacy.github.io
 
-Personal GitHub Pages site for [npadalacy](https://github.com/npadalacy).
+Personal  GitHub Pages site for [npadalacy](https://github.com/npadalacy).
 
 **Live URL:** https://npadalacy.github.io/
 
